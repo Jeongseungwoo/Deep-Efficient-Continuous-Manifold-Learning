@@ -28,7 +28,7 @@ def main():
 
     parser.add_argument('--ode', default = True, type=bool)
 
-    parser.add_argument('--path', default='/DataRead/swjeong', help='Directory')
+    parser.add_argument('--path', default='./', help='Directory')
     # parser.add_argument('--path', default='../../../datasets', help='Directory')
     parser.add_argument('--batch', default=8, type=int, help='Batch size')
     parser.add_argument('-f', '--fold', default=1, type=int, help='Index of fold') #5

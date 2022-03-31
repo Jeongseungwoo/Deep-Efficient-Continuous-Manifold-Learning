@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--ode', default = True, type=bool)
 
-    parser.add_argument('--path', default='/DataRead/swjeong', help='Directory')
+    parser.add_argument('--path', default='./', help='Directory')
     # parser.add_argument('--path', default='../../../datasets', help='Directory')
     parser.add_argument('--batch', default=32, type=int, help='Batch size')
     # parser.add_argument('--sub', default=13, type=int, help='Subject number') #0-19
