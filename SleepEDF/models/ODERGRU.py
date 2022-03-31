@@ -17,12 +17,12 @@ class ODERGRU(nn.Module):
 
         self.cnn = F1(C=channel, latents=latents)
         # self.odefunc = ODEFunc(n_inputs=units * (units + 1) // 2, n_layers=n_layers, n_units=n_units)
-        self.lgru_d = RGRUCell(latents, units, True)
-        self.lgru_l = RGRUCell(latents * (latents - 1) // 2, units * (units - 1) // 2, False)
+        self.rgru_d = RGRUCell(latents, units, True)
+        self.rgru_l = RGRUCell(latents * (latents - 1) // 2, units * (units - 1) // 2, False)
         if bi:
             self.odefunc_re = ODEFunc(n_inputs=units * (units + 1) // 2, n_layers=n_layers, n_units=n_units)
-            self.lgru_d_re = LGRUCell(latents, units, True)
-            self.lgru_l_re = LGRUCell(latents * (latents - 1) // 2, units * (units - 1) // 2, False)
+            self.rgru_d_re = RGRUCell(latents, units, True)
+            self.rgru_l_re = RGRUCell(latents * (latents - 1) // 2, units * (units - 1) // 2, False)
 
         self.softplus = nn.Softplus()
         # self.att = nn.Sequential(
@@ -51,14 +51,14 @@ class ODERGRU(nn.Module):
         for i in range(x.shape[1]):
             h_d = hp[:, :self.units].tanh().exp()
             h_l = hp[:, self.units:]
-            h_d = self.lgru_d(x_d[:, i, :], h_d)
-            h_l = self.lgru_l(x_l[:, i, :], h_l)
+            h_d = self.rgru_d(x_d[:, i, :], h_d)
+            h_l = self.rgru_l(x_l[:, i, :], h_l)
             out.append(torch.cat((h_d.log(), h_l), dim=1))
             if self.bi:
                 h_d_re = hp_re[:, :self.units].tanh().exp()
                 h_l_re = hp_re[:, self.units:]
-                h_d_re = self.lgru_d_re(x_d[:, x.shape[1] - i - 1, :], h_d_re)
-                h_l_re = self.lgru_l_re(x_l[:, x.shape[1] - i - 1, :], h_l_re)
+                h_d_re = self.rgru_d_re(x_d[:, x.shape[1] - i - 1, :], h_d_re)
+                h_l_re = self.rgru_l_re(x_l[:, x.shape[1] - i - 1, :], h_l_re)
                 out_re.append(torch.cat((h_d_re.log(), h_l_re), dim=1))
         h = torch.stack(out, dim=1)
         if self.bi:
