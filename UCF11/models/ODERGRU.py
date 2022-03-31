@@ -8,9 +8,9 @@ import math
 from torchdiffeq import odeint as odeint
 
 
-class ODEManifold(nn.Module):
+class ODERGRU(nn.Module):
     def __init__(self, n_class, n_layers, n_units, latents, units, ode=True, device='cpu'):
-        super(ODEManifold, self).__init__()
+        super(ODERGRU, self).__init__()
 
         self.latents = latents
         self.units = units
@@ -18,8 +18,8 @@ class ODEManifold(nn.Module):
 
         self.cnn = CNN(latents=latents)
         self.odefunc = ODEFunc(n_inputs=units * 2, n_layers=n_layers, n_units=n_units)
-        self.lgru_d = LGRUCell(latents, units, True)
-        self.lgru_l = LGRUCell(latents * (latents - 1) // 2, units, False)
+        self.rgru_d = RGRUCell(latents, units, True)
+        self.rgru_l = RGRUCell(latents * (latents - 1) // 2, units, False)
         self.softplus = nn.Softplus()
         self.cls = nn.Linear(units * 2, n_class)
 
@@ -44,8 +44,8 @@ class ODEManifold(nn.Module):
                 hp = odeint(self.odefunc, torch.cat((h_d.log(), h_l), dim=1), times[:2], rtol=1e-4, atol=1e-5, method='euler')[1]
                 h_d = hp[:, :self.units].tanh().exp()
                 h_l = hp[:, self.units:]
-            h_d = self.lgru_d(x_d[:, i, :], h_d)
-            h_l = self.lgru_l(x_l[:, i, :], h_l)
+            h_d = self.rgru_d(x_d[:, i, :], h_d)
+            h_l = self.rgru_l(x_l[:, i, :], h_l)
             out.append(torch.cat((h_d.log(), h_l), dim=1))
         # h = torch.cat((h_d.log(), h_l), dim=1)
         h = torch.stack(out).mean(0)
@@ -63,14 +63,14 @@ class ODEManifold(nn.Module):
             l[i] = torch.cat([L[i][j: j + 1, :j] for j in range(1, n)], dim=1)[0]
         return d.reshape(b, s, -1), l.reshape(b, s, -1)
 
-class LGRUCell(nn.Module):
+class RGRUCell(nn.Module):
     """
-    An implementation of LGRUCell.
+    An implementation of RGRUCell.
 
     """
 
     def __init__(self, input_size, hidden_size, diag=True):
-        super(LGRUCell, self).__init__()
+        super(RGRUCell, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.diag = diag
@@ -149,17 +149,6 @@ class CNN(nn.Module):
         # x = self.linear(x)
         return x
 
-
-# class CNN(nn.Module):
-#     def __init__(self, latents):
-#         #pretrained model
-#         super(CNN, self).__init__()
-#         self.resnet = models.resnet18(pretrained = True)
-#         self.resnet.fc = nn.Linear(512, latents * (latents+1)//2)
-#
-#     def forward(self, x):
-#         x = self.resnet(x)
-#         return x
 
 class PosLinear(nn.Module):
     def __init__(self, in_dim, out_dim, bias=False):
