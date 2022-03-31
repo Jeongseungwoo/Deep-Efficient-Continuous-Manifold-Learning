@@ -123,7 +123,7 @@ def main(args):
         targets = []
         ys = np.concatenate(ys)
         h_ys = np.concatenate(h_ys)
-        for i in range(len(ys)-args.T): #이부분 다시코딩함.
+        for i in range(len(ys)-args.T):
             y = 0
             for t in reversed(range(args.T)):
                 y += np.log(h_ys[i+t][args.T - 1 - t])
