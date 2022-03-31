@@ -160,7 +160,7 @@ if __name__ == "__main__":
     parser.add_argument('--weight_decay', type=float, default=1e-4)
     parser.add_argument('--task', type=str, default="UEA")  # UCR, UEA
     parser.add_argument('--dataset', type=str, default='CharacterTrajectories')
-    parser.add_argument('--path', type=str, default='/DataRead/swjeong/')
+    parser.add_argument('--path', type=str, default='./')
     # Model parameters
     parser.add_argument('--time', type=int, default=5)  # time percent.
     parser.add_argument('--dilation', type=int, default=1)
