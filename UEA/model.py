@@ -46,7 +46,7 @@ class ODERGRU(nn.Module):
             out_re = []
 
         for i in range(x.shape[1]):
-            hp = odeint(self.odefunc, torch.cat((h_d.log(), h_l), dim=1), times[i:i + 2].flip(0), rtol=1e-4, atol=1e-5,
+            hp = odeint(self.odefunc, torch.cat((h_d.log(), h_l), dim=1), times[i:i + 2], rtol=1e-4, atol=1e-5,
                         method='euler')[1]
             h_d = hp[:, :self.units].tanh().exp()
             h_l = hp[:, self.units:]
